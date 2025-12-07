@@ -1,12 +1,6 @@
-/* UrlCard styles - normal CSS (no Tailwind)
-
-Classnames used:
-.url-card
-.url-title
-.url-meta
-.badge
-.neon-border
-*/
+/* ----------------------------------------------------------
+   Base Card Styling (from your version)
+-----------------------------------------------------------*/
 
 .url-card{
   position: relative;
@@ -23,34 +17,67 @@ Classnames used:
 }
 
 .url-card:hover{
-  transform: translateY(-6px) scale(1.01);
-  box-shadow: 0 20px 60px rgba(124,92,255,0.12);
+  transform: translateY(-6px) scale(1.02) rotateX(6deg) rotateY(-4deg);
+  box-shadow: 0 20px 60px rgba(124,92,255,0.15);
 }
 
-/* Neon border - using pseudo element for glow */
-.neon-border::before{
+/* ----------------------------------------------------------
+   Neon Glow Border
+-----------------------------------------------------------*/
+.url-card::before{
   content: "";
   position: absolute;
   inset: -2px;
   border-radius: 14px;
   background: linear-gradient(90deg, rgba(0,229,255,0.95), rgba(124,92,255,0.95));
   z-index: 0;
-  filter: blur(8px);
-  opacity: 0.85;
+  filter: blur(10px);
+  opacity: 0.8;
   mix-blend-mode: screen;
-  transition: transform 200ms ease, opacity 200ms ease;
 }
 
-/* ensure content is above pseudo-element */
-.url-card > *{ position: relative; z-index: 1; }
+/* Content above border */
+.url-card > *{ position: relative; z-index: 2; }
 
-.url-title{
-  font-size: 14px;
+/* ----------------------------------------------------------
+   Title + Meta
+-----------------------------------------------------------*/
+.url-title,
+.url-text{
+  font-size: 15px;
   font-weight: 700;
   margin-bottom: 8px;
   word-break: break-all;
 }
 
+/* Glitch effect for neon hologram */
+.url-text {
+  position: relative;
+}
+.url-text::before,
+.url-text::after {
+  content: attr(data-text);
+  position: absolute;
+  opacity: 0.55;
+  pointer-events: none;
+}
+.url-text::before { color: #00eaff; left: -2px; top: 0; }
+.url-text::after { color: #b982ff; left: 2px; top: 0; }
+
+/* Glitch animation on hover */
+.url-card:hover .url-text::before,
+.url-card:hover .url-text::after {
+  animation: glitch 0.25s steps(3) infinite;
+}
+@keyframes glitch {
+  0% { transform: translateX(-2px); }
+  50% { transform: translateX(2px); }
+  100% { transform: translateX(-2px); }
+}
+
+/* ----------------------------------------------------------
+   Badges & Meta
+-----------------------------------------------------------*/
 .url-meta{
   display: flex;
   gap: 8px;
@@ -65,26 +92,191 @@ Classnames used:
   font-size: 12px;
   background: linear-gradient(90deg, rgba(124,92,255,0.92), rgba(0,229,255,0.9));
   color: #041025;
-  box-shadow: 0 8px 26px rgba(124,92,255,0.12);
+  box-shadow: 0 8px 26px rgba(124,92,255,0.14);
 }
 
 .badge.status{
-  background: rgba(255,255,255,0.03);
+  background: rgba(255,255,255,0.05);
   color: #eaf2ff;
-  border: 1px solid rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
 }
 
-.status-success{ color: #00e596; border-color: rgba(0,230,150,0.08); background: rgba(0,220,140,0.06); }
-.status-warning{ color: #ffd580; border-color: rgba(255,165,0,0.06); background: rgba(255,165,0,0.04); }
+/* ----------------------------------------------------------
+   Risk Classes (glowing)
+-----------------------------------------------------------*/
+.risk-low { box-shadow: 0 0 18px rgba(0,255,180,0.18) inset; }
+.risk-medium { box-shadow: 0 0 18px rgba(255,185,60,0.18) inset; }
+.risk-high { animation: riskPulse 1.4s infinite ease-in-out; }
 
-.url-section{ margin-top: 8px; padding-top: 6px; border-top: 1px dashed rgba(255,255,255,0.03); }
-.section-label{ font-size: 12px; opacity: 0.85; margin-bottom: 6px; }
-.section-value{ font-size: 13px; color: rgba(234,242,255,0.9); }
+@keyframes riskPulse {
+  0% { box-shadow: 0 0 14px rgba(255,60,60,0.35); }
+  100% { box-shadow: 0 0 32px rgba(255,20,20,0.75); }
+}
 
-.att-item{ font-size: 12px; color: rgba(234,242,255,0.8); margin-top: 4px; }
-.mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', monospace; font-size: 12px; }
+/* ----------------------------------------------------------
+   Score Circle
+-----------------------------------------------------------*/
+.score-wrap { text-align: center; }
 
+.circular-chart{
+  width: 64px;
+  height: 64px;
+  transform: rotate(-90deg);
+}
+
+.circle-bg {
+  fill: none;
+  stroke: rgba(255,255,255,0.05);
+  stroke-width: 3.5;
+}
+.circle {
+  fill: none;
+  stroke: url(#gradient);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  transition: stroke-dasharray .6s ease;
+}
+.score-text {
+  font-size: 10px;
+  fill: #dff6ff;
+  text-anchor: middle;
+  transform: rotate(90deg);
+}
+
+/* ----------------------------------------------------------
+   Score Bar
+-----------------------------------------------------------*/
+.score-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 20px;
+  margin: 10px 0 18px 0;
+  overflow: hidden;
+}
+.score-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00eaff, #b982ff);
+  box-shadow: 0 0 15px #00eaff88;
+  border-radius: 20px;
+  transition: width 0.6s ease;
+}
+
+/* ----------------------------------------------------------
+   Bot Scanning Shimmer + Radar Pulse
+-----------------------------------------------------------*/
+.scanning {
+  position: relative;
+  overflow: hidden;
+}
+.scanning::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -200px;
+  width: 200px;
+  height: 100%;
+  background: linear-gradient(120deg, transparent, #00eaff33, transparent);
+  animation: shimmer 2s infinite;
+}
+@keyframes shimmer {
+  0% { left: -200px; }
+  100% { left: 120%; }
+}
+
+/* Radar pulse */
+.scanning::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  background: radial-gradient(circle, rgba(0,255,255,0.15), transparent 70%);
+  animation: radarPulse 1.8s infinite ease-out;
+}
+@keyframes radarPulse {
+  0% { transform: scale(0.85); opacity: 0.5; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
+/* ----------------------------------------------------------
+   Scan shimmer text
+-----------------------------------------------------------*/
+.scan-shimmer {
+  padding: 16px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.03);
+  color: #bfeaff;
+  font-size: 0.9rem;
+  text-align: center;
+  animation: blink 1.3s infinite alternate;
+}
+@keyframes blink {
+  from { opacity: 0.35; }
+  to { opacity: 1; }
+}
+
+/* ----------------------------------------------------------
+   Hologram Sparkle Effect
+-----------------------------------------------------------*/
+.url-card:hover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(255,255,255,0.05),
+    rgba(255,255,255,0.05) 1px,
+    transparent 2px,
+    transparent 4px
+  );
+  opacity: 0.5;
+  animation: holoSparkle 0.5s steps(4) infinite;
+  pointer-events: none;
+  border-radius: 14px;
+}
+@keyframes holoSparkle {
+  0% { background-position: 0 0; }
+  100% { background-position: 40px 40px; }
+}
+
+/* ----------------------------------------------------------
+   Sections
+-----------------------------------------------------------*/
+.section{
+  background: rgba(255,255,255,0.03);
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 10px;
+}
+.section-title{
+  font-size: 0.95rem;
+  color: #cfefff;
+}
+.section-content p { margin: 6px 0; }
+
+/* Split Layout */
+.section.split{
+  display: flex;
+  gap: 12px;
+}
+.section.split > * { flex: 1; }
+
+/* Issues list */
+.issues-list{ margin: 6px 0 0 16px; }
+.issue-item{ margin: 4px 0; }
+
+/* FDC */
+.mono{
+  font-family: Menlo, monospace;
+  font-size: 12px;
+  color: #aff;
+}
+
+/* ----------------------------------------------------------
+   Responsive
+-----------------------------------------------------------*/
 @media (max-width:520px){
   .url-card{ padding: 12px; }
-  .url-title{ font-size: 13px; }
+  .url-text{ font-size: 13px; }
+  .circular-chart{ width: 52px; height: 52px; }
 }

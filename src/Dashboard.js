@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import "./styles/Dashboard.css";
-import UrlCard from "./components/UrlCard";
+import "../styles/Dashboard.css";
+import UrlCard from "../components/UrlCard";
 
 export default function Dashboard() {
   const [items, setItems] = useState([]);
@@ -11,9 +11,18 @@ export default function Dashboard() {
     let mounted = true;
     async function load() {
       try {
-        const res = await fetch("/api/urls");
-        const data = await res.json();
+        const res = await fetch("http://localhost:5000/api/urls");
+        const text = await res.text();
+        
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          throw new Error(`Non-JSON response: ${text}`);
+        }
+
         if (!res.ok) throw new Error(data.error || "Failed to load URLs");
+
         if (mounted) setItems(data);
       } catch (err) {
         if (mounted) setError(err.message);
@@ -21,6 +30,7 @@ export default function Dashboard() {
         if (mounted) setLoading(false);
       }
     }
+
     load();
     return () => (mounted = false);
   }, []);

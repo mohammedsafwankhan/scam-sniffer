@@ -1,80 +1,40 @@
-import React, { useState } from "react";
-import "./styles/Report.css";
-import Dashboard from "./Dashboard";
-import NeonButton from "./components/NeonButton";
+import React from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
+import Navigation from './components/Navigation';
+import LoadingSpinner from './components/LoadingSpinner';
+import Report from './pages/Report';
+import Dashboard from './pages/Dashboard';
+import './styles/global.css';
+import Rewards from './Rewards';
 
-function App() {
-  const [url, setUrl] = useState("");
-  const [status, setStatus] = useState("");
-  const [loading, setLoading] = useState(false);
+export default function App() {
+  const location = useLocation();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!url) {
-      setStatus("Please enter a URL to report.");
-      return;
-    }
-
-    setLoading(true);
-    setStatus("Reporting...");
-
-    try {
-      const res = await fetch("/api/report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data.error || "Failed to report URL");
-
-      setStatus(
-        `Reported: ${data.url || url} — reports: ${data.reportCount ?? "-"}`
-      );
-      setUrl("");
-    } catch (err) {
-      setStatus(`Error: ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const showDashboard = window.location.pathname.startsWith("/dashboard");
-
-  return showDashboard ? (
-    <Dashboard />
-  ) : (
-    <div className="report-container">
-      <div className="report-card" role="region" aria-label="Report URL card">
-        <h1 className="report-title">Scam Sniffer - Report Suspicious URL</h1>
-
-        <form onSubmit={handleSubmit} className="report-form">
-          <input
-            type="url"
-            className="report-input"
-            placeholder="https://example.com"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            aria-label="URL to report"
-          />
-
-          <NeonButton
-            text={loading ? "Reporting..." : "Submit"}
-            type="submit"
-            disabled={loading}
-            ariaLabel="Submit report"
-          />
-        </form>
-
-        <div className="status-message" aria-live="polite">
-          {status}
-        </div>
-
-        <NeonButton text="Dashboard" link="/dashboard" ariaLabel="Go to dashboard" />
-      </div>
+  return (
+    <div>
+      <Navigation />
+      <React.Suspense fallback={<LoadingSpinner />}>
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <Report />
+              </motion.div>
+            } />
+            <Route path="/dashboard" element={
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <Dashboard />
+              </motion.div>
+            } />
+            <Route path="/Rewards" element={
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <Rewards />
+              </motion.div>
+            } />
+          </Routes>
+        </AnimatePresence>
+      </React.Suspense>
     </div>
   );
 }
-
-export default App;

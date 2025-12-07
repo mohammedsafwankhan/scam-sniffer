@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB Connect — NO options needed now
-mongoose.connect("mongodb+srv://classybutwired_db_user:JRLeyUIeXZv0gtGy@scamdb.w5twl2w.mongodb.net/?appName=ScAMdb")
+mongoose.connect(MONGODB_URL)
   .then(() => console.log("MongoDB connected"))
   .catch(err => console.log("MongoDB error:", err));
 

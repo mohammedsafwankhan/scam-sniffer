@@ -1,0 +1,98 @@
+/* Global animated blockchain-themed background
+
+Requirements implemented:
+- Dark gradient (purple → blue → black)
+- Faint hexagon grid overlay (SVG data-URI)
+- Slowly moving animated gradient lines
+- Neon blue glow on edges
+- Applied to html and body
+
+Keep it subtle so content remains readable.
+*/
+
+:root {
+  --bg-dark-1: #070714; /* black-blue */
+  --bg-purple: #18062b; /* purple */
+  --bg-blue: #061033; /* deep blue */
+  --neon-blue: rgba(0, 229, 255, 0.9);
+  --neon-edge: rgba(0, 150, 255, 0.12);
+}
+
+/* Base on html/body so it fills viewport and is inherited by everything */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-dark-1);
+  color: #eaf2ff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* layered background using multiple background images
+   1) solid radial gradient base
+   2) animated moving lines layer (pseudo-element)
+   3) subtle hexagon grid overlay (SVG data URI)
+   4) soft neon edge vignette (to emphasize edges)
+*/
+body {
+  position: relative;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(1200px 700px at 10% 15%, rgba(0,110,255,0.06), transparent 8%),
+    linear-gradient(180deg, var(--bg-purple) 0%, var(--bg-blue) 45%, var(--bg-dark-1) 100%),
+    /* hex grid overlay (very faint) */
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='104' viewBox='0 0 120 104'><defs><pattern id='h' width='60' height='52' patternUnits='userSpaceOnUse'><path d='M30 0 L60 15 L60 37 L30 52 L0 37 L0 15 Z' fill='none' stroke='%23ffffff' stroke-opacity='0.02' stroke-width='1'/></pattern></defs><rect width='100%' height='100%' fill='url(%23h)'/></svg>");
+  background-repeat: no-repeat, no-repeat, repeat;
+  background-position: center top, center top, 0 0;
+  background-size: 1200px 800px, cover, auto;
+  overflow-x: hidden;
+}
+
+/* animated gradient lines: use a pseudo element so it sits above the base gradient but under content */
+body::before {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image: linear-gradient(115deg, rgba(124,92,255,0.06) 0%, rgba(0,229,255,0.06) 30%, rgba(124,92,255,0.04) 60%, rgba(0,0,0,0) 100%);
+  mix-blend-mode: overlay;
+  filter: blur(18px) brightness(0.95);
+  opacity: 0.95;
+  transform: translateZ(0);
+  animation: floatLines 18s linear infinite;
+}
+
+/* subtle neon blue glow on edges using another pseudo-element */
+body::after {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(60% 40% at 50% 2%, rgba(0,229,255,0.04), transparent 10%),
+              radial-gradient(40% 30% at 2% 90%, rgba(124,92,255,0.02), transparent 12%),
+              radial-gradient(40% 30% at 98% 90%, rgba(0,150,255,0.02), transparent 12%);
+  mix-blend-mode: screen;
+}
+
+/* keep the animation subtle — translate background position slowly */
+@keyframes floatLines {
+  0%   { transform: translateY(0) translateX(0) scale(1); }
+  25%  { transform: translateY(-6px) translateX(4px) scale(1.02); }
+  50%  { transform: translateY(-10px) translateX(-6px) scale(1.01); }
+  75%  { transform: translateY(-6px) translateX(6px) scale(0.99); }
+  100% { transform: translateY(0) translateX(0) scale(1); }
+}
+
+/* ensure main content stacks above these decorative layers */
+#root, .report-container, .dashboard-container {
+  position: relative;
+  z-index: 1;
+}
+
+/* small accessibility consideration: reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  body::before { animation: none; }
+}
